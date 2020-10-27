@@ -1,4 +1,4 @@
-Visual Effects Editor
+OpenCV Visual Effects Editor
 ==========================
 
 Visual Effects Editor that can preview and tweak paramters in the browser. Hot reloads python modules, for a seamless experience when editing
