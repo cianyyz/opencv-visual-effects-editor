@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>config panel</title>
+    <script src="https://kit.fontawesome.com/3242d18db0.js" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Roboto:wght@500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/config_panel.css') }}">
+</head>
+<table>
+ {% if config %}
+    {% for key, value in config.items() %}
+      <tr><td class="label" ><label> {{key}} </label></td><td>
+        <p id="{{key}}output">{{ (value['value']) | string | upper}}</p>
+      </td><td>
+      {% if value["visual_type"] == "slider" %}
+          <input type="range" min="{{ value['min'] }}" max="{{ value['max'] }}" value="{{ value['value'] }}"
+            class="slider right-align" name="{{key}}" id="{{ key }}" oninput="document.getElementById('{{key}}output').innerHTML = this.value.toString().toLocaleUpperCase();"/>
+      {% elif value["visual_type"] == "color_picker" %}
+          <input type="color" value="{{ value['value'] }}" class="colorpicker" name="{{key}}" id="{{ key }}" onchange="document.getElementById('{{key}}output').innerHTML = this.value.toString().toLocaleUpperCase();"/>
+      {% elif value["visual_type"] == "checkbox" %}
+          <input type="{{value['visual_type']}}" {{ 'checked' if value['value'] == True else ''}} class="checkbox" name="{{key}}" 
+              id="{{ key }}" oninput="document.getElementById('{{key}}output').innerHTML = this.checked.toString().toLocaleUpperCase();"/>
+      {% else %}
+          <input type="{{value['visual_type']}}" min="{{ value['min'] }}" max="{{ value['max'] }}"
+                      value="{{ value['value'] }}" class="{{value['visual_type']}}" name="{{key}}" id="{{ key }}" oninput="document.getElementById('{{key}}output').innerHTML = this.value.toString().toLocaleUpperCase();"/>
+      {% endif %}
+      </td></tr>
+    {% endfor %}
+ {% else %}
+    <p class="empty-config">No config detected 😧</p>
+ {% endif %}
+</table>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script>
+$(document).ready(function() {
+       $("input").change(function(e) {
+          var {id, type, checked} = e.target;
+          var val = $('#' + id).val();
+          val = (type == 'checkbox')?checked:val;
+          dataInput = {
+            'key': id,
+            'val': val,
+            'type': type
+          }
+          $.ajax({
+              url: "/module_config_panel/submit",
+              type: "POST",
+              data: dataInput,
+              success: function(response) {
+                $("bg").html(response);
+              },
+              error: function(xhr) {
+                //Do Something to handle error
+              }
+            });
+      });
+});
+</script>
+</html>

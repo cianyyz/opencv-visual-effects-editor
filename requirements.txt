@@ -1,0 +1,14 @@
+numpy
+pygame
+imageio
+decorator
+tqdm
+moviepy
+docutils
+pygments
+pypiwin32
+opencv-python
+opencv-contrib-python
+vcam
+cmake
+dlib

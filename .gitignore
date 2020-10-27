@@ -1,0 +1,9 @@
+venv
+.vscode
+src/__pycache__
+src/modules/__pycache__
+
+src/static/video/*
+src/static/img/*
+!src/static/img/video_not_found.png
+!src/static/video/big_buck_bunny.mp4

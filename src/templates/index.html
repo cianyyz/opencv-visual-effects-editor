@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Visual Effects Editor</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    </head>
+    <body>
+        <div class="wrapper" style="position:relative;">
+            <div class="unit settings2">
+                
+                <div class="unit module">
+                    <iframe id="module_settings_panel" class="settings"  frameborder='0' 
+                    src="{{ url_for('module_settings')}}"></iframe>
+                </div>
+
+                <div class="unit config">
+                    <iframe id="module_config_panel" class="settings" frameborder='0' width=500 height=300
+                        src="{{ url_for('module_config_panel')}}"></iframe>
+                </div>
+
+            </div>
+
+            <div class="unit player">
+                <img id="videocontainer" src="{{ url_for('video_feed') }}">
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>config panel</title>
+  <script src="https://kit.fontawesome.com/3242d18db0.js" crossorigin="anonymous"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Roboto:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/config_panel.css') }}">
+</head>
+<form id="thisform" method="POST">
+
+    <label>Class:</label>
+    <select name="module_class"  id="module_class">
+      {% if current_class %}
+        <option value='{{ current_class }}'>{{ current_class }}</option>
+      {% endif %}
+      {% for vclass in classes %}
+             <option value='{{ vclass }}'>{{ vclass }}</option>
+        {% endfor %}
+    </select>
+    <br />
+    <label>SHOW FILTER
+      <input id="show_filter" name="show_filter" type="checkbox" {{filtered}}>
+    </label>
+    <br />
+    <label> PAUSED
+      <input id="paused" name="paused" type="checkbox" {{paused}}>
+    </label>
+    <br />
+    <label>Video:</label>
+    <select name="video-file-input" id="video-file-input">
+      {% if current_video %}
+      <option value='{{ current_video }}'>{{ current_video }}</option>
+      {% endif %}
+      {% for video in videos %}
+      <option value='{{ video }}'>{{ video }}</option>
+      {% endfor %}
+    </select>
+    <br />
+</form>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        var show = undefined;
+        function update_params(){
+          var module_class = $("#module_class").val();
+          var show = ($("#show_filter").is(":checked")) ? 'true' : 'false';
+          var paused = ($("#paused").is(":checked")) ? 'true' : 'false';
+          $.ajax({
+            url: "/module_settings_form",
+            type: "get",
+            data: { class: module_class, show: show, paused: paused },
+            success: function (response) {
+              parent.document.getElementById('module_config_panel').contentWindow.location.reload()
+            },
+            error: function (xhr) {
+              //Do Something to handle error
+            }
+          });
+        }
+        function update_video(){
+          var filed = $("#video-file-input").val();
+          console.log(filed)
+          var dataInput = { video: filed.toString(), bol: true }
+          console.log(dataInput)
+          $.ajax({
+            url: '/change_video_src',
+            type: 'get',
+            data: { video: filed.toString(), bol: true },
+            success: function (data) {
+
+            }
+          });
+        
+        }
+        $("#show_filter").change(update_params);
+        $("#module_class").change(update_params);
+        $("#paused").change(update_params);
+        $("#video-file-input").change(update_video)
+    });
+    </script>
