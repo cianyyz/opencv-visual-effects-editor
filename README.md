@@ -11,10 +11,12 @@ Features
 - Video caching so only one render per frame is needed
 - Time-based filters which allows the creation of transitions
 
+
 Todo
 -------------
 - Exporting
-- Video playback controls
+- ~~Video playback controls~~
+- Hotkeys
 - Error handling
 - Add submodule configuration type
 - Make README.md better
