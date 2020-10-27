@@ -8,7 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Roboto:wght@500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/config_panel.css') }}">
 </head>
-<form id="thisform" method="POST">
+<form id="thisform" method="GET">
 
     <label>Class:</label>
     <select name="module_class"  id="module_class">
@@ -20,14 +20,23 @@
         {% endfor %}
     </select>
     <br />
+
     <label>SHOW FILTER
       <input id="show_filter" name="show_filter" type="checkbox" {{filtered}}>
     </label>
     <br />
+
     <label> PAUSED
       <input id="paused" name="paused" type="checkbox" {{paused}}>
     </label>
     <br />
+
+    <button id="framebackward" name="framebackward">BACK</button>
+    <br />
+
+    <button id="frameforward" name="frameforward">FORWARD</button>
+    <br />
+
     <label>Video:</label>
     <select name="video-file-input" id="video-file-input">
       {% if current_video %}
@@ -47,11 +56,10 @@
         function update_params(){
           var module_class = $("#module_class").val();
           var show = ($("#show_filter").is(":checked")) ? 'true' : 'false';
-          var paused = ($("#paused").is(":checked")) ? 'true' : 'false';
           $.ajax({
             url: "/module_settings_form",
             type: "get",
-            data: { class: module_class, show: show, paused: paused },
+            data: { class: module_class, show: show},
             success: function (response) {
               parent.document.getElementById('module_config_panel').contentWindow.location.reload()
             },
@@ -68,16 +76,27 @@
           $.ajax({
             url: '/change_video_src',
             type: 'get',
-            data: { video: filed.toString(), bol: true },
-            success: function (data) {
-
-            }
+            data: { video: filed.toString(), bol: true }
           });
-        
+        }
+
+        function update_playback(e){
+          var paused = ($("#paused").is(":checked")) ? 'true' : 'false';
+          console.log(e.target)
+          console.log(e.target.id)
+          var {id} = e.target
+          $.ajax({
+            url: '/playback_controls',
+            type: 'get',
+            data: { paused: paused, action: id},
+            success: () => {}
+          });
         }
         $("#show_filter").change(update_params);
         $("#module_class").change(update_params);
-        $("#paused").change(update_params);
-        $("#video-file-input").change(update_video)
+        $("#paused").change(update_playback);
+        $("#video-file-input").change(update_video);
+        $("#framebackward").click(update_playback);
+        $("#frameforward").click(update_playback);
     });
     </script>

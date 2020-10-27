@@ -3,7 +3,7 @@ from picture import VideoLoop
 import importlib
 import os
 import json
-from cv2 import imread, imencode
+from cv2 import imread, imencode, CAP_PROP_POS_FRAMES
 from os import listdir
 from os.path import isfile, join
 
@@ -64,22 +64,20 @@ def module_settings_form():
         vid.load_mask_module()
     vid.show_filter_change(
         value=True if request.args['show'] == 'true' else False)
-    vid.paused = True if request.args['paused'] == 'true' else False
     return "", 200
 
 
 def gen(VideoLoop):
     while True:
-        if vid is None:
+        if VideoLoop is None:
             frame = imread(os.path.join(os.path.dirname(
                 os.path.abspath(__file__)), 'static', 'img', 'video_not_found.png'))
-            ret, png = imencode('.jpg', frame)
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + png.tobytes() + b'\r\n\r\n')
         else:
-            frame = VideoLoop.get_frame()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+            frame = VideoLoop.get_frame() if not VideoLoop.paused else VideoLoop.last_frame
+        ret, jpeg = imencode('.jpg', frame)
+        byte_frame = jpeg.tobytes()
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + byte_frame + b'\r\n\r\n')
 
 
 @app.route('/video_feed')
@@ -88,11 +86,24 @@ def video_feed():
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
+@app.route('/playback_controls', methods=['GET'])
+def playback_controls():
+    print(request.args)
+    if 'action' in request.args:
+        if request.args['action'] == 'frameforward':
+            # This will set last_frame to next frame updating the paused frame to the next one
+            vid.get_frame()
+        elif request.args['action'] == 'framebackward':
+            vid.capture.set(CAP_PROP_POS_FRAMES,
+                            vid.capture.get(CAP_PROP_POS_FRAMES) - 2)  # Sets it two frames back
+            vid.get_frame()  # Goes forward a frame ( 1 frame behind original)
+        elif request.args['action'] == 'paused':
+            vid.paused = True if request.args['paused'] == 'true' else False
+    return "", 200
+
+
 @app.route('/change_video_src', methods=['GET', 'POST'])
 def change_video_src():
-    print(request.args)
-    print(request.form)
-    print(request.values)
     vid.set_src(video=os.path.join(videos_path, request.args.get('video')))
     # vid.set_src(file)
     return '', 200

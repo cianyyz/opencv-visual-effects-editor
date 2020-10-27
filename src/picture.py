@@ -44,7 +44,7 @@ class VideoLoop(object):
                 self.filter = self.filter_class(self.config)
                 self.config = self.filter.config
                 self.cached_video = CachedVideo()
-                self.get_frame(skip=False)
+                self.get_frame()
                 #  print('Selected Load')
             except ModuleNotFoundError:
                 print('Invalid module')
@@ -78,23 +78,10 @@ class VideoLoop(object):
             self.load_mask_module()
             self.show_filter = value
 
-    def get_frame(self, skip=True):
-        frame = self.build_frame(skip)
-        try:
-            ret, jpeg = cv2.imencode('.jpg', frame)
-            if not ret:
-                print(colored("FAIL HERE", "red"))
-            sleep(1/self.fps)
-            return jpeg.tobytes()
-        except TypeError:
-            print(f"TYPE ERROR HERE {self.last_log}")
-            return self.get_frame()
+    def get_frame(self):
+        sleep(1/self.fps)
 
-    def build_frame(self, skip=True):
-        if skip and self.paused and self.last_frame is not None:
-            self.last_log = 'PAUSED'
-            return self.last_frame
-
+        # If there is a full cached video
         if self.cached_video.ready is True:
             if not self.show_filter:
                 del self.cached_video
@@ -105,15 +92,13 @@ class VideoLoop(object):
             self.last_log = 'CACHED'
             return frame
 
+        # Playing and uncached
         else:
-            if not skip:
-                ret, frame = True, self.last_frame
-            else:
-                ret, frame = self.capture.read()
+            ret, frame = self.capture.read()
             if not ret:
                 self.capture = cv2.VideoCapture(self.video_src)
-                self.last_log = 'ReLAy'
-                return self.get_frame(skip)
+                self.last_log = 'Relay'
+                return self.get_frame()
 
             if self.show_filter:
                 frame = self.add_filter(frame)
